@@ -5,13 +5,17 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
+  Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Sample cycle data
 const CYCLES = [
@@ -27,10 +31,8 @@ const TIMELINE_ENTRIES = [
     weight: '60 kg',
     temp: '32°C',
     emotion: 'Happy',
-    emotionIcon: 'sentiment-satisfied',
     symptoms: '-',
     energy: 'High',
-    energyIcon: 'bolt',
     sleep: '6-9 hrs',
     activity: '-',
   },
@@ -40,11 +42,8 @@ const TIMELINE_ENTRIES = [
     weight: '60 kg',
     temp: '34°C',
     emotion: 'Stressed',
-    emotionIcon: 'sentiment-stressed',
     symptoms: 'Headache',
-    symptomsIcon: 'sick',
     energy: 'Low',
-    energyIcon: 'battery-low',
     sleep: '3-6 hrs',
     activity: '-',
   },
@@ -61,18 +60,20 @@ const TIMELINE_ENTRIES = [
   },
 ];
 
-function CycleBar({ current }: { current: boolean }) {
+function CycleBar({ current, isDark }: { current: boolean; isDark: boolean }) {
+  const colors = Colors[isDark ? 'dark' : 'light'];
+  
   return (
     <View style={styles.cycleBarContainer}>
       {Array.from({ length: 28 }).map((_, i) => {
-        let color = Colors[current ? 'light' : 'light'].border;
+        let color = colors.border;
         let height = 16;
 
         if (i < 5) {
           color = Colors.primary;
           height = i < 4 ? 32 : 24;
         } else if (i >= 9 && i <= 12) {
-          color = Colors.primaryLight;
+          color = isDark ? Colors.primaryDark : Colors.primaryLight;
           height = 20;
         } else if (i === 13) {
           color = Colors.secondary;
@@ -93,14 +94,16 @@ function CycleBar({ current }: { current: boolean }) {
   );
 }
 
-function CyclesView() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+function CyclesView({ isDark }: { isDark: boolean }) {
+  const colors = Colors[isDark ? 'dark' : 'light'];
 
   return (
     <View style={styles.tabContent}>
       {/* Average Stats Card */}
-      <View style={[styles.statsCard, { backgroundColor: colors.surface }]}>
+      <Animated.View 
+        entering={FadeInDown.delay(100).springify()}
+        style={[styles.statsCard, { backgroundColor: colors.surface }]}
+      >
         <View style={[styles.statColumn, { borderRightWidth: 1, borderRightColor: colors.border }]}>
           <Text style={[styles.statLabel, { color: colors.textSub }]}>Average cycle</Text>
           <Text style={[styles.statValue, { color: colors.text }]}>28 Days</Text>
@@ -117,38 +120,45 @@ function CyclesView() {
             <Text style={styles.normalText}>Normal</Text>
           </View>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Cycle History Header */}
-      <View style={styles.historyHeader}>
+      <Animated.View 
+        entering={FadeInDown.delay(200).springify()}
+        style={styles.historyHeader}
+      >
         <Text style={[styles.historyTitle, { color: colors.text }]}>Cycle history</Text>
-        <TouchableOpacity style={[styles.shareButton, { borderColor: colors.border }]}>
+        <TouchableOpacity style={[styles.shareButton, { borderColor: colors.border }]} activeOpacity={0.7}>
           <Text style={[styles.shareText, { color: colors.text }]}>Share Report</Text>
           <MaterialIcons name="ios-share" size={14} color={colors.text} />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {/* Legend */}
-      <View style={styles.legendRow}>
+      <Animated.View entering={FadeInDown.delay(250).springify()} style={styles.legendRow}>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: Colors.primary }]} />
-          <Text style={[styles.legendText, { color: colors.textSub }]}>Period phase</Text>
+          <Text style={[styles.legendText, { color: colors.textSub }]}>Period</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: Colors.primaryLight }]} />
-          <Text style={[styles.legendText, { color: colors.textSub }]}>Fertile window</Text>
+          <View style={[styles.legendDot, { backgroundColor: isDark ? Colors.primaryDark : Colors.primaryLight }]} />
+          <Text style={[styles.legendText, { color: colors.textSub }]}>Fertile</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: Colors.secondary }]} />
-          <Text style={[styles.legendText, { color: colors.textSub }]}>Ovulation phase</Text>
+          <Text style={[styles.legendText, { color: colors.textSub }]}>Ovulation</Text>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Cycle Cards */}
       {CYCLES.map((cycle, index) => (
-        <View key={index} style={[styles.cycleCard, { backgroundColor: colors.surface }]}>
+        <Animated.View 
+          key={index} 
+          entering={FadeInDown.delay(300 + index * 100).springify()}
+          style={[styles.cycleCard, { backgroundColor: colors.surface }]}
+        >
           <Text style={[styles.cycleDateRange, { color: colors.text }]}>{cycle.dateRange}</Text>
-          <CycleBar current={cycle.current} />
+          <CycleBar current={cycle.current} isDark={isDark} />
           <View style={styles.cycleStats}>
             <View style={styles.cycleStat}>
               <Text style={[styles.cycleStatText, { color: colors.textSub }]}>
@@ -165,33 +175,36 @@ function CyclesView() {
               <Text style={styles.cycleStatNormal}>Normal</Text>
             </View>
           </View>
-        </View>
+        </Animated.View>
       ))}
     </View>
   );
 }
 
-function TimelineView() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+function TimelineView({ isDark }: { isDark: boolean }) {
+  const colors = Colors[isDark ? 'dark' : 'light'];
 
   return (
     <View style={styles.tabContent}>
-      <View style={styles.timelineHeader}>
+      <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.timelineHeader}>
         <Text style={[styles.timelineTitle, { color: colors.text }]}>Timeline</Text>
-        <TouchableOpacity style={[styles.shareButton, { borderColor: colors.border }]}>
+        <TouchableOpacity style={[styles.shareButton, { borderColor: colors.border }]} activeOpacity={0.7}>
           <Text style={[styles.shareText, { color: colors.text }]}>Share Report</Text>
           <MaterialIcons name="ios-share" size={14} color={colors.text} />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {TIMELINE_ENTRIES.map((entry, index) => (
-        <View key={index} style={[styles.timelineCard, { backgroundColor: colors.surface }]}>
+        <Animated.View 
+          key={index}
+          entering={FadeInDown.delay(200 + index * 100).springify()}
+          style={[styles.timelineCard, { backgroundColor: colors.surface }]}
+        >
           <View style={[styles.timelineCardHeader, { borderBottomColor: colors.border }]}>
-            <View>
+            <View style={styles.timelineHeaderLeft}>
               <Text style={[styles.timelineDate, { color: Colors.primary }]}>{entry.date}</Text>
               <Text style={[styles.timelineDaysUntil, { color: colors.textSub }]}>
-                {entry.daysUntil} Days until next period
+                {entry.daysUntil} Days until period
               </Text>
             </View>
             <View style={styles.timelineMetrics}>
@@ -210,46 +223,46 @@ function TimelineView() {
             <View style={styles.timelineGridItem}>
               <MaterialIcons
                 name={entry.emotion !== '-' ? 'sentiment-satisfied' : 'sentiment-neutral'}
-                size={24}
+                size={22}
                 color={entry.emotion !== '-' ? Colors.primary : colors.textSub}
               />
               <Text style={[styles.gridLabel, { color: colors.textSub }]}>Emotions</Text>
-              <Text style={[styles.gridValue, { color: colors.text }]}>{entry.emotion}</Text>
+              <Text style={[styles.gridValue, { color: colors.text }]} numberOfLines={1}>{entry.emotion}</Text>
             </View>
             <View style={styles.timelineGridItem}>
               <MaterialIcons
                 name="healing"
-                size={24}
+                size={22}
                 color={entry.symptoms !== '-' ? Colors.primary : colors.textSub}
               />
               <Text style={[styles.gridLabel, { color: colors.textSub }]}>Symptoms</Text>
-              <Text style={[styles.gridValue, { color: colors.text }]}>{entry.symptoms}</Text>
+              <Text style={[styles.gridValue, { color: colors.text }]} numberOfLines={1}>{entry.symptoms}</Text>
             </View>
             <View style={styles.timelineGridItem}>
               <MaterialIcons
                 name="bolt"
-                size={24}
+                size={22}
                 color={entry.energy !== '-' ? Colors.primary : colors.textSub}
               />
               <Text style={[styles.gridLabel, { color: colors.textSub }]}>Energy</Text>
-              <Text style={[styles.gridValue, { color: colors.text }]}>{entry.energy}</Text>
+              <Text style={[styles.gridValue, { color: colors.text }]} numberOfLines={1}>{entry.energy}</Text>
             </View>
             <View style={styles.timelineGridItem}>
               <MaterialIcons
                 name="bedtime"
-                size={24}
+                size={22}
                 color={entry.sleep !== '-' ? Colors.primary : colors.textSub}
               />
               <Text style={[styles.gridLabel, { color: colors.textSub }]}>Sleep</Text>
-              <Text style={[styles.gridValue, { color: colors.text }]}>{entry.sleep}</Text>
+              <Text style={[styles.gridValue, { color: colors.text }]} numberOfLines={1}>{entry.sleep}</Text>
             </View>
             <View style={styles.timelineGridItem}>
-              <MaterialIcons name="favorite" size={24} color={colors.textSub} />
-              <Text style={[styles.gridLabel, { color: colors.textSub }]}>Sexual Act.</Text>
-              <Text style={[styles.gridValue, { color: colors.text }]}>{entry.activity}</Text>
+              <MaterialIcons name="favorite" size={22} color={colors.textSub} />
+              <Text style={[styles.gridLabel, { color: colors.textSub }]}>Activity</Text>
+              <Text style={[styles.gridValue, { color: colors.text }]} numberOfLines={1}>{entry.activity}</Text>
             </View>
           </View>
-        </View>
+        </Animated.View>
       ))}
     </View>
   );
@@ -258,24 +271,29 @@ function TimelineView() {
 export default function RecordsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const isDark = colorScheme === 'dark';
   const [activeTab, setActiveTab] = useState<'cycles' | 'timeline'>('cycles');
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.background }]}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <Animated.View entering={FadeInUp.springify()} style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {/* Tabs */}
-      <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>
+      <Animated.View 
+        entering={FadeInDown.springify()}
+        style={[styles.tabsContainer, { borderBottomColor: colors.border }]}
+      >
         <TouchableOpacity
           style={[styles.tab, activeTab === 'cycles' && styles.activeTab]}
           onPress={() => setActiveTab('cycles')}
+          activeOpacity={0.7}
         >
           <Text
             style={[
@@ -289,6 +307,7 @@ export default function RecordsScreen() {
         <TouchableOpacity
           style={[styles.tab, activeTab === 'timeline' && styles.activeTab]}
           onPress={() => setActiveTab('timeline')}
+          activeOpacity={0.7}
         >
           <Text
             style={[
@@ -299,10 +318,10 @@ export default function RecordsScreen() {
             Timeline
           </Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {activeTab === 'cycles' ? <CyclesView /> : <TimelineView />}
+        {activeTab === 'cycles' ? <CyclesView isDark={isDark} /> : <TimelineView isDark={isDark} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -324,24 +343,26 @@ const styles = StyleSheet.create({
   tabsContainer: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    paddingHorizontal: Spacing.lg,
+    marginHorizontal: Spacing.md,
   },
   tab: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginRight: 24,
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   activeTab: {
     borderBottomWidth: 2,
     borderBottomColor: Colors.primary,
   },
   tabText: {
-    fontSize: 18,
+    fontSize: typography.size.body + 2,
     fontWeight: '600',
   },
   scrollContent: {
     padding: Spacing.md,
     paddingBottom: 40,
+    overflow: 'hidden',
   },
   tabContent: {
     gap: 16,
@@ -355,17 +376,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+    overflow: 'hidden',
   },
   statColumn: {
     flex: 1,
     gap: 4,
-    paddingRight: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: typography.size.caption,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: typography.size.h2,
     fontWeight: 'bold',
   },
   normalBadge: {
@@ -375,7 +398,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   normalText: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     color: Colors.success,
     fontWeight: '500',
   },
@@ -385,7 +408,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   historyTitle: {
-    fontSize: 18,
+    fontSize: typography.size.body + 2,
     fontWeight: 'bold',
   },
   shareButton: {
@@ -398,7 +421,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   shareText: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     fontWeight: '500',
   },
   legendRow: {
@@ -417,7 +440,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   legendText: {
-    fontSize: 12,
+    fontSize: typography.size.small,
   },
   cycleCard: {
     borderRadius: BorderRadius.lg,
@@ -427,9 +450,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+    overflow: 'hidden',
   },
   cycleDateRange: {
-    fontSize: 14,
+    fontSize: typography.size.caption,
     fontWeight: '600',
     marginBottom: 12,
   },
@@ -446,7 +470,8 @@ const styles = StyleSheet.create({
   },
   cycleStats: {
     flexDirection: 'row',
-    gap: 16,
+    flexWrap: 'wrap',
+    gap: 12,
   },
   cycleStat: {
     flexDirection: 'row',
@@ -454,7 +479,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   cycleStatText: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     fontWeight: '500',
   },
   cycleStatNormal: {
@@ -468,37 +493,41 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   timelineTitle: {
-    fontSize: 20,
+    fontSize: typography.size.h3,
     fontWeight: '600',
   },
   timelineCard: {
     borderRadius: BorderRadius.lg,
-    padding: 20,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+    overflow: 'hidden',
   },
   timelineCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     paddingBottom: 12,
-    marginBottom: 16,
+    marginBottom: 12,
     borderBottomWidth: 1,
   },
+  timelineHeaderLeft: {
+    flex: 1,
+  },
   timelineDate: {
-    fontSize: 18,
+    fontSize: typography.size.body,
     fontWeight: '600',
   },
   timelineDaysUntil: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     marginTop: 4,
   },
   timelineMetrics: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
   },
   metric: {
     flexDirection: 'row',
@@ -506,7 +535,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   metricText: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     fontWeight: '500',
   },
   timelineGrid: {
@@ -515,15 +544,15 @@ const styles = StyleSheet.create({
   },
   timelineGridItem: {
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
     flex: 1,
   },
   gridLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '500',
   },
   gridValue: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '500',
   },
 });

@@ -6,12 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 type ReminderCardProps = {
@@ -24,6 +25,7 @@ type ReminderCardProps = {
   showInterval?: boolean;
   intervalText?: string;
   note?: string;
+  delay?: number;
 };
 
 function ReminderCard({
@@ -36,16 +38,20 @@ function ReminderCard({
   showInterval,
   intervalText,
   note,
+  delay = 0,
 }: ReminderCardProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
   return (
-    <View style={[
-      styles.reminderCard,
-      { backgroundColor: colors.surface },
-      !enabled && styles.cardDisabled,
-    ]}>
+    <Animated.View 
+      entering={FadeInDown.delay(delay).springify()}
+      style={[
+        styles.reminderCard,
+        { backgroundColor: colors.surface },
+        !enabled && styles.cardDisabled,
+      ]}
+    >
       <View style={styles.cardHeader}>
         <Text style={[styles.cardTitle, { color: colors.text }]}>{title}</Text>
         <Switch
@@ -110,13 +116,14 @@ function ReminderCard({
           </>
         )}
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
 export default function NotificationsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const isDark = colorScheme === 'dark';
 
   const [periodEnabled, setPeriodEnabled] = useState(true);
   const [fertileEnabled, setFertileEnabled] = useState(false);
@@ -124,28 +131,29 @@ export default function NotificationsScreen() {
   const [padEnabled, setPadEnabled] = useState(false);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <Animated.View entering={FadeInUp.springify()} style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          activeOpacity={0.7}
         >
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Title Section */}
-        <View style={styles.titleSection}>
+        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.titleSection}>
           <MaterialIcons name="notifications" size={40} color={colors.text} />
           <Text style={[styles.title, { color: colors.text }]}>Set your reminder notification</Text>
           <Text style={[styles.subtitle, { color: colors.textSub }]}>
             This reminder will help you feel prepared for your next cycle
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Reminder Cards */}
         <View style={styles.cardsContainer}>
@@ -156,6 +164,7 @@ export default function NotificationsScreen() {
             schedule="1 day before"
             time="07:00 AM"
             message="Your period will start soon"
+            delay={200}
           />
 
           <ReminderCard
@@ -165,6 +174,7 @@ export default function NotificationsScreen() {
             schedule="1 day before"
             time="06:00 PM"
             message="You will be fertile soon"
+            delay={300}
           />
 
           <ReminderCard
@@ -174,6 +184,7 @@ export default function NotificationsScreen() {
             schedule="1 day before"
             time="06:00 PM"
             message="You will be ovulating soon"
+            delay={400}
           />
 
           <ReminderCard
@@ -186,6 +197,7 @@ export default function NotificationsScreen() {
             showInterval
             intervalText="Every 4 hours"
             note="(This reminder works only when you are having your period.)"
+            delay={500}
           />
         </View>
       </ScrollView>
@@ -209,6 +221,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: 100,
+    overflow: 'hidden',
   },
   titleSection: {
     alignItems: 'center',
@@ -216,7 +229,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: 20,
+    fontSize: typography.size.h3,
     fontWeight: 'bold',
     marginTop: 12,
     textAlign: 'center',
@@ -239,6 +252,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+    overflow: 'hidden',
   },
   cardDisabled: {
     opacity: 0.8,
@@ -250,8 +264,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: typography.size.caption,
     fontWeight: '600',
+    flex: 1,
+    marginRight: 8,
   },
   cardNote: {
     fontSize: 10,
@@ -270,16 +286,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   settingLabel: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     fontWeight: '500',
   },
   settingValue: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    flexShrink: 1,
   },
   settingText: {
-    fontSize: 12,
-    maxWidth: 150,
+    fontSize: typography.size.small,
+    maxWidth: 130,
   },
 });

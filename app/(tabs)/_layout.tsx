@@ -1,10 +1,13 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const TAB_WIDTH = SCREEN_WIDTH / 4;
 
 type TabIconProps = {
   name: keyof typeof MaterialIcons.glyphMap;
@@ -16,8 +19,15 @@ type TabIconProps = {
 function TabIcon({ name, color, focused, label }: TabIconProps) {
   return (
     <View style={styles.tabIconContainer}>
-      <MaterialIcons name={name} size={24} color={color} />
-      <Text style={[styles.tabLabel, { color }]}>{label}</Text>
+      <MaterialIcons name={name} size={26} color={color} />
+      <Text 
+        style={[styles.tabLabel, { color }]} 
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.8}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -35,18 +45,21 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          height: 70,
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: 75,
+          paddingBottom: 10,
+          paddingTop: 10,
         },
         tabBarShowLabel: false,
+        tabBarItemStyle: {
+          width: TAB_WIDTH,
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Calendar',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="calendar-today" color={color} focused={focused} label="Calendar" />
+            <TabIcon name="home" color={color} focused={focused} label="Home" />
           ),
         }}
       />
@@ -85,10 +98,12 @@ const styles = StyleSheet.create({
   tabIconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    width: TAB_WIDTH - 10,
+    gap: 2,
   },
   tabLabel: {
-    fontSize: 10,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

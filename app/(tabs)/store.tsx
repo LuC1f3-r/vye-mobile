@@ -1,32 +1,68 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '@/constants/theme';
+import { View, Text, StyleSheet, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import { Colors, Spacing, typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function StoreScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const isDark = colorScheme === 'dark';
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>L-Store</Text>
-      <Text style={[styles.subtitle, { color: colors.textSub }]}>Coming soon...</Text>
-    </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <Animated.View entering={FadeInUp.springify()} style={styles.content}>
+        <View style={[styles.iconContainer, { backgroundColor: colors.surface }]}>
+          <MaterialIcons name="shopping-bag" size={48} color={Colors.primary} />
+        </View>
+        <Text style={[styles.title, { color: colors.text }]}>L-Store</Text>
+        <Text style={[styles.subtitle, { color: colors.textSub }]}>
+          Shop for wellness products curated for you
+        </Text>
+        <Text style={[styles.comingSoon, { color: Colors.primary }]}>Coming Soon! 🛍️</Text>
+      </Animated.View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
+  iconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   title: {
-    fontSize: 24,
+    fontSize: typography.size.h2,
     fontWeight: 'bold',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
-    marginTop: 8,
+    fontSize: typography.size.caption,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  comingSoon: {
+    fontSize: typography.size.body,
+    fontWeight: '600',
   },
 });

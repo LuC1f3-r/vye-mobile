@@ -6,13 +6,29 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  SafeAreaView,
   StatusBar,
+  Dimensions,
+  Pressable,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import Animated, { 
+  FadeInDown, 
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
+import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const EMOTIONS = [
   { id: 'happy', emoji: '😊', label: 'Happy' },
@@ -49,6 +65,8 @@ const DATES = [
   { day: 6, future: true },
 ];
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 type ChipProps = {
   label: string;
   emoji?: string;
@@ -58,14 +76,30 @@ type ChipProps = {
 };
 
 function Chip({ label, emoji, selected, onPress, colors }: ChipProps) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.95);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+  };
+
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       style={[
         styles.chip,
         { backgroundColor: selected ? Colors.primary : colors.background },
+        animatedStyle,
       ]}
       onPress={onPress}
-      activeOpacity={0.7}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
     >
       {emoji && <Text style={styles.chipEmoji}>{emoji}</Text>}
       <Text
@@ -76,13 +110,14 @@ function Chip({ label, emoji, selected, onPress, colors }: ChipProps) {
       >
         {label}
       </Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 
 export default function AddStateScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const isDark = colorScheme === 'dark';
 
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>(['headache']);
@@ -102,26 +137,54 @@ export default function AddStateScreen() {
   };
 
   const handleSave = () => {
-    // TODO: Save state data
     router.back();
   };
 
+  // Scroll-triggered save button animation
+  const saveButtonTranslateY = useSharedValue(100);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const isNearBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 50;
+    
+    if (isNearBottom) {
+      // Show button - pop up from bottom
+      saveButtonTranslateY.value = withSpring(0, { damping: 15, stiffness: 150 });
+    } else {
+      // Hide button - slide down and fade out
+      saveButtonTranslateY.value = withSpring(100, { damping: 20, stiffness: 120 });
+    }
+  };
+
+  const saveButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: saveButtonTranslateY.value }],
+    opacity: interpolate(saveButtonTranslateY.value, [100, 0], [0, 1], Extrapolation.CLAMP),
+  }));
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <Animated.View entering={FadeInUp.springify()} style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Add State</Text>
         <View style={styles.headerPlaceholder} />
-      </View>
+      </Animated.View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.scrollContent}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
         {/* Mini Date Picker */}
-        <View style={[styles.datePicker, { backgroundColor: colors.surface }]}>
+        <Animated.View 
+          entering={FadeInDown.delay(100).springify()}
+          style={[styles.datePicker, { backgroundColor: colors.surface }]}
+        >
           <View style={styles.weekDaysRow}>
             {WEEK_DAYS.map((day) => (
               <View key={day} style={styles.weekDayCell}>
@@ -151,10 +214,13 @@ export default function AddStateScreen() {
               </View>
             ))}
           </View>
-        </View>
+        </Animated.View>
 
         {/* Emotions Section */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Animated.View 
+          entering={FadeInDown.delay(200).springify()}
+          style={[styles.section, { backgroundColor: colors.surface }]}
+        >
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Emotions</Text>
           <View style={styles.chipsContainer}>
             {EMOTIONS.map((emotion) => (
@@ -168,10 +234,13 @@ export default function AddStateScreen() {
               />
             ))}
           </View>
-        </View>
+        </Animated.View>
 
         {/* Symptoms Section */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Animated.View 
+          entering={FadeInDown.delay(300).springify()}
+          style={[styles.section, { backgroundColor: colors.surface }]}
+        >
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Symptoms</Text>
           <View style={styles.chipsContainer}>
             {SYMPTOMS.map((symptom) => (
@@ -184,10 +253,13 @@ export default function AddStateScreen() {
               />
             ))}
           </View>
-        </View>
+        </Animated.View>
 
         {/* Energy Section */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Animated.View 
+          entering={FadeInDown.delay(400).springify()}
+          style={[styles.section, { backgroundColor: colors.surface }]}
+        >
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Energy</Text>
           <View style={styles.chipsContainer}>
             {ENERGY_LEVELS.map((level) => (
@@ -201,10 +273,13 @@ export default function AddStateScreen() {
               />
             ))}
           </View>
-        </View>
+        </Animated.View>
 
         {/* Notes Section */}
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Animated.View 
+          entering={FadeInDown.delay(500).springify()}
+          style={[styles.section, { backgroundColor: colors.surface }]}
+        >
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Notes</Text>
           <TextInput
             style={[
@@ -222,11 +297,13 @@ export default function AddStateScreen() {
             onChangeText={setNotes}
             textAlignVertical="top"
           />
-        </View>
+        </Animated.View>
       </ScrollView>
 
-      {/* Floating Save Button */}
-      <View style={[styles.saveContainer, { backgroundColor: colors.surface }]}>
+      {/* Floating Save Button - appears when scrolled to bottom */}
+      <Animated.View 
+        style={[styles.saveContainer, saveButtonAnimatedStyle]}
+      >
         <TouchableOpacity
           style={styles.saveButton}
           onPress={handleSave}
@@ -235,7 +312,7 @@ export default function AddStateScreen() {
           <MaterialIcons name="check" size={28} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={[styles.saveLabel, { color: colors.textSub }]}>Save</Text>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -255,7 +332,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: typography.size.body + 2,
     fontWeight: 'bold',
   },
   headerPlaceholder: {
@@ -264,6 +341,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.md,
     paddingBottom: 120,
+    overflow: 'hidden',
   },
   datePicker: {
     borderRadius: BorderRadius.lg,
@@ -274,37 +352,36 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+    overflow: 'hidden',
   },
   weekDaysRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 8,
   },
   weekDayCell: {
-    width: 32,
+    flex: 1,
     alignItems: 'center',
   },
   weekDayText: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     fontWeight: '500',
   },
   datesRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   dateCell: {
-    width: 32,
+    flex: 1,
     alignItems: 'center',
   },
   dateCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
   dateText: {
-    fontSize: 14,
+    fontSize: typography.size.caption,
   },
   dateTextBold: {
     fontWeight: 'bold',
@@ -318,9 +395,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+    overflow: 'hidden',
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: typography.size.body,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 16,
@@ -329,12 +407,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 12,
+    gap: 10,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: BorderRadius.full,
   },
@@ -343,20 +421,19 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   chipLabel: {
-    fontSize: 14,
+    fontSize: typography.size.caption,
     fontWeight: '500',
   },
   notesInput: {
     borderRadius: BorderRadius.md,
     padding: 12,
-    fontSize: 14,
+    fontSize: typography.size.caption,
     minHeight: 80,
   },
   saveContainer: {
     position: 'absolute',
-    bottom: 20,
-    left: '50%',
-    transform: [{ translateX: -28 }],
+    bottom: 30,
+    alignSelf: 'center',
     alignItems: 'center',
   },
   saveButton: {
@@ -373,7 +450,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   saveLabel: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     marginTop: 4,
     fontWeight: '500',
   },

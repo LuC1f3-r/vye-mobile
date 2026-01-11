@@ -6,12 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const MENU_ITEMS = [
@@ -21,7 +22,7 @@ const MENU_ITEMS = [
   { icon: 'palette', label: 'Themes' },
   { icon: 'rate-review', label: 'Help and Feedback' },
   { icon: 'verified-user', label: 'Data Privacy' },
-  { icon: 'info', label: 'About Lily' },
+  { icon: 'info', label: 'About Vye' },
 ] as const;
 
 const GOALS = ['Track cycle', 'Track pregnancy', 'Get pregnant'];
@@ -29,38 +30,43 @@ const GOALS = ['Track cycle', 'Track pregnancy', 'Get pregnant'];
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const isDark = colorScheme === 'dark';
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
-        <View style={styles.header}>
+        <Animated.View entering={FadeInUp.springify()} style={styles.header}>
           <MaterialIcons name="settings" size={28} color={colors.text} />
           <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
-        </View>
+        </Animated.View>
 
         {/* Profile Section */}
-        <TouchableOpacity style={styles.profileSection}>
-          <View style={styles.profileInfo}>
-            <Image
-              source={{ uri: 'https://i.pravatar.cc/100?img=5' }}
-              style={styles.profileImage}
-            />
-            <View style={styles.profileText}>
-              <Text style={[styles.profileName, { color: colors.text }]}>Sreelekshmi S Raj</Text>
-              <Text style={[styles.profileSubtext, { color: colors.textSub }]}>
-                view personal information
-              </Text>
+        <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <TouchableOpacity style={styles.profileSection} activeOpacity={0.7}>
+            <View style={styles.profileInfo}>
+              <Image
+                source={{ uri: 'https://i.pravatar.cc/100?img=5' }}
+                style={styles.profileImage}
+              />
+              <View style={styles.profileText}>
+                <Text style={[styles.profileName, { color: colors.text }]} numberOfLines={1}>
+                  Rahaf Saad 
+                </Text>
+                <Text style={[styles.profileSubtext, { color: colors.textSub }]} numberOfLines={1}>
+                  view personal information
+                </Text>
+              </View>
             </View>
-          </View>
-          <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />
-        </TouchableOpacity>
+            <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />
+          </TouchableOpacity>
+        </Animated.View>
 
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
         {/* Goals Section */}
-        <View style={styles.goalsSection}>
+        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.goalsSection}>
           <View style={styles.goalsHeader}>
             <MaterialIcons name="calendar-month" size={20} color={colors.text} />
             <Text style={[styles.goalsLabel, { color: colors.text }]}>My Goal:</Text>
@@ -79,6 +85,7 @@ export default function SettingsScreen() {
                     ? { backgroundColor: Colors.primary }
                     : { backgroundColor: colors.surface },
                 ]}
+                activeOpacity={0.7}
               >
                 <Text
                   style={[
@@ -91,26 +98,41 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
-        </View>
+        </Animated.View>
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
-          {MENU_ITEMS.map((item) => (
-            <TouchableOpacity
-              key={item.label}
-              style={[styles.menuItem, { borderBottomColor: colors.border }]}
-              onPress={() => {
-                if (item.label === 'Notifications') {
-                  router.push('/notifications');
-                }
-              }}
+          {MENU_ITEMS.map((item, index) => (
+            <Animated.View 
+              key={item.label} 
+              entering={FadeInDown.delay(300 + index * 50).springify()}
             >
-              <View style={styles.menuItemLeft}>
-                <MaterialIcons name={item.icon as any} size={24} color={colors.text} />
-                <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
-              </View>
-              <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={() => {
+                  if (item.label === 'Notifications') {
+                    router.push('/notification-settings');
+                  } else if (item.label === 'Language') {
+                    router.push('/language');
+                  } else if (item.label === 'Themes') {
+                    router.push('/themes');
+                  } else if (item.label === 'Help and Feedback') {
+                    router.push('/help-feedback');
+                  } else if (item.label === 'Data Privacy') {
+                    router.push('/data-privacy');
+                  } else if (item.label === 'About Vye') {
+                    router.push('/about');
+                  }
+                }}
+                activeOpacity={0.6}
+              >
+                <View style={styles.menuItemLeft}>
+                  <MaterialIcons name={item.icon as any} size={24} color={colors.text} />
+                  <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />
+              </TouchableOpacity>
+            </Animated.View>
           ))}
         </View>
       </ScrollView>
@@ -124,6 +146,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 100,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
@@ -133,7 +156,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: typography.size.h2,
     fontWeight: 'bold',
   },
   profileSection: {
@@ -146,22 +169,24 @@ const styles = StyleSheet.create({
   profileInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: 12,
+    flex: 1,
   },
   profileImage: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
   },
   profileText: {
     gap: 2,
+    flex: 1,
   },
   profileName: {
-    fontSize: 18,
+    fontSize: typography.size.body + 2,
     fontWeight: '600',
   },
   profileSubtext: {
-    fontSize: 12,
+    fontSize: typography.size.small,
   },
   divider: {
     height: 1,
@@ -179,7 +204,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   goalsLabel: {
-    fontSize: 14,
+    fontSize: typography.size.caption,
     fontWeight: '600',
   },
   goalsContainer: {
@@ -192,7 +217,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   goalText: {
-    fontSize: 12,
+    fontSize: typography.size.small,
     fontWeight: '500',
   },
   menuContainer: {
@@ -210,9 +235,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
+    flex: 1,
   },
   menuLabel: {
-    fontSize: 16,
+    fontSize: typography.size.body,
     fontWeight: '500',
   },
 });
