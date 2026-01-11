@@ -4,7 +4,7 @@ import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/constants/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TAB_WIDTH = SCREEN_WIDTH / 4;
@@ -33,13 +33,12 @@ function TabIcon({ name, color, focused, label }: TabIconProps) {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const { colors, accent } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
+        tabBarActiveTintColor: accent.primary,
         tabBarInactiveTintColor: colors.tabIconDefault,
         headerShown: false,
         tabBarStyle: {

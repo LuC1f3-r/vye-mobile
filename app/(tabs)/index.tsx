@@ -26,7 +26,7 @@ import Animated, {
   Layout,
 } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/constants/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_HORIZONTAL_MARGIN = Spacing.md;
@@ -106,9 +106,7 @@ function AnimatedCard({ children, onPress, style, delay = 0 }: AnimatedCardProps
 }
 
 export default function DashboardScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
   const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 1)); // January 2024
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
@@ -176,7 +174,7 @@ export default function DashboardScreen() {
                 <View 
                   style={[
                     styles.bandBackground,
-                    { backgroundColor: inPeriod ? 'rgba(219, 108, 135, 0.15)' : Colors.primaryLight },
+                    { backgroundColor: inPeriod ? 'rgba(219, 108, 135, 0.15)' : accent.primaryLight },
                     !prevInFertile && !prevInPeriod && { borderTopLeftRadius: DAY_CELL_SIZE / 2, borderBottomLeftRadius: DAY_CELL_SIZE / 2, left: '10%' },
                     !nextInFertile && !nextInPeriod && { borderTopRightRadius: DAY_CELL_SIZE / 2, borderBottomRightRadius: DAY_CELL_SIZE / 2, right: '10%' },
                   ]} 
@@ -187,7 +185,7 @@ export default function DashboardScreen() {
               <View
                 style={[
                   styles.dayCircle,
-                  dayStyle.type === 'period' && { backgroundColor: Colors.primary },
+                  dayStyle.type === 'period' && { backgroundColor: accent.primary },
                   dayStyle.type === 'ovulation' && { backgroundColor: Colors.secondary },
                   dayStyle.type === 'today' && { borderWidth: 2, borderColor: colors.text },
                 ]}
@@ -198,7 +196,7 @@ export default function DashboardScreen() {
                     { color: colors.text },
                     dayStyle.type === 'period' && { color: '#FFFFFF', fontWeight: '600' },
                     dayStyle.type === 'ovulation' && { color: '#FFFFFF', fontWeight: '600' },
-                    dayStyle.type === 'fertile' && { color: Colors.primary },
+                    dayStyle.type === 'fertile' && { color: accent.primary },
                     dayStyle.type === 'today' && { fontWeight: '700' },
                   ]}
                 >
@@ -243,7 +241,7 @@ export default function DashboardScreen() {
             onPress={() => router.push('/notifications')}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="notifications-none" size={26} color={Colors.primary} />
+            <MaterialIcons name="notifications-none" size={26} color={accent.primary} />
           </TouchableOpacity>
         </Animated.View>
 
@@ -297,13 +295,13 @@ export default function DashboardScreen() {
                   <Text style={[styles.legendText, { color: colors.textSub }]}>Today</Text>
                 </View>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendBox, { backgroundColor: Colors.primaryLight }]} />
+                  <View style={[styles.legendBox, { backgroundColor: accent.primaryLight }]} />
                   <Text style={[styles.legendText, { color: colors.textSub }]}>Fertile</Text>
                 </View>
               </View>
               <View style={styles.legendRow}>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendBox, { backgroundColor: Colors.primary }]} />
+                  <View style={[styles.legendBox, { backgroundColor: accent.primary }]} />
                   <Text style={[styles.legendText, { color: colors.textSub }]}>Period</Text>
                 </View>
                 <View style={styles.legendItem}>
@@ -323,12 +321,12 @@ export default function DashboardScreen() {
             onPress={() => router.push('/add-state')}
             delay={300}
           >
-            <Text style={[styles.feelingTitle, { color: Colors.primary }]}>
+            <Text style={[styles.feelingTitle, { color: accent.primary }]}>
               How are you{'\n'}feeling today?
             </Text>
             <View style={styles.feelingButtonContainer}>
               <View style={[styles.addButton, { backgroundColor: colors.background }]}>
-                <MaterialIcons name="add" size={28} color={Colors.primary} />
+                <MaterialIcons name="add" size={28} color={accent.primary} />
               </View>
             </View>
           </AnimatedCard>
@@ -341,8 +339,8 @@ export default function DashboardScreen() {
               delay={400}
             >
               <View style={styles.miniCardHeader}>
-                <Text style={[styles.miniCardTitle, { color: Colors.primary }]}>View Records</Text>
-                <MaterialIcons name="analytics" size={18} color={Colors.primary} />
+                <Text style={[styles.miniCardTitle, { color: accent.primary }]}>View Records</Text>
+                <MaterialIcons name="analytics" size={18} color={accent.primary} />
               </View>
               <Text style={[styles.miniCardDesc, { color: colors.textSub }]} numberOfLines={2}>
                 Know how your past cycles went and the challenges you faced.
@@ -354,8 +352,8 @@ export default function DashboardScreen() {
               delay={500}
             >
               <View style={styles.miniCardHeader}>
-                <Text style={[styles.miniCardTitle, { color: Colors.primary }]}>Edit your cycle</Text>
-                <MaterialIcons name="edit-calendar" size={18} color={Colors.primary} />
+                <Text style={[styles.miniCardTitle, { color: accent.primary }]}>Edit your cycle</Text>
+                <MaterialIcons name="edit-calendar" size={18} color={accent.primary} />
               </View>
               <Text style={[styles.miniCardDesc, { color: colors.textSub }]} numberOfLines={2}>
                 You can always edit the first day of your last period.

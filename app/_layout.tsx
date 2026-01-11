@@ -1,24 +1,24 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { ThemeProvider, useTheme } from '@/constants/ThemeContext';
 import { Colors } from '@/constants/theme';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function RootLayoutNav() {
+  const { isDark, accent } = useTheme();
 
   // Custom theme with Period Tracker colors
   const customLightTheme = {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
-      primary: Colors.primary,
+      primary: accent.primary,
       background: Colors.light.background,
       card: Colors.light.surface,
       text: Colors.light.text,
@@ -30,7 +30,7 @@ export default function RootLayout() {
     ...DarkTheme,
     colors: {
       ...DarkTheme.colors,
-      primary: Colors.primary,
+      primary: accent.primary,
       background: Colors.dark.background,
       card: Colors.dark.surface,
       text: Colors.dark.text,
@@ -39,7 +39,7 @@ export default function RootLayout() {
   };
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? customDarkTheme : customLightTheme}>
+    <NavigationThemeProvider value={isDark ? customDarkTheme : customLightTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen 
@@ -99,7 +99,15 @@ export default function RootLayout() {
           }} 
         />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+    </NavigationThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootLayoutNav />
     </ThemeProvider>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -14,27 +14,22 @@ import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme, AccentColorKey } from '@/constants/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - Spacing.lg * 2 - 12) / 2; // 2 cards with gap
 
 const ACCENT_COLORS = [
-  { id: 'pink', name: 'Default', description: 'Default', color: Colors.primary },
-  { id: 'lavender', name: 'Lavender', description: 'Calm', color: '#A78BFA' },
-  { id: 'mint', name: 'Mint', description: 'Fresh', color: '#10B981' },
-  { id: 'ocean', name: 'Ocean', description: 'Deep', color: '#3B82F6' },
-  { id: 'sunset', name: 'Sunset', description: 'Warm', color: '#F97316' },
-  { id: 'custom', name: 'Custom', description: 'Pro', color: '#A855F7', isCustom: true },
+  { id: 'pink' as AccentColorKey, name: 'Default', description: 'Default', color: Colors.primary },
+  { id: 'lavender' as AccentColorKey, name: 'Lavender', description: 'Calm', color: '#A78BFA' },
+  { id: 'mint' as AccentColorKey, name: 'Mint', description: 'Fresh', color: '#10B981' },
+  { id: 'ocean' as AccentColorKey, name: 'Ocean', description: 'Deep', color: '#3B82F6' },
+  { id: 'sunset' as AccentColorKey, name: 'Sunset', description: 'Warm', color: '#F97316' },
+  { id: 'custom' as AccentColorKey, name: 'Custom', description: 'Pro', color: '#A855F7', isCustom: true },
 ];
 
 export default function ThemesScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
-
-  const [selectedAppearance, setSelectedAppearance] = useState<'light' | 'dark' | 'system'>('light');
-  const [selectedAccent, setSelectedAccent] = useState('pink');
+  const { appearance, setAppearance, accentColor, setAccentColor, isDark, colors } = useTheme();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -63,9 +58,9 @@ export default function ThemesScreen() {
             <TouchableOpacity
               style={[
                 styles.appearanceCard,
-                { backgroundColor: colors.surface, borderColor: selectedAppearance === 'light' ? Colors.primary : colors.border },
+                { backgroundColor: colors.surface, borderColor: appearance === 'light' ? Colors.primary : colors.border },
               ]}
-              onPress={() => setSelectedAppearance('light')}
+              onPress={() => setAppearance('light')}
               activeOpacity={0.7}
             >
               <View style={styles.lightPreview}>
@@ -73,16 +68,16 @@ export default function ThemesScreen() {
                 <View style={[styles.previewBar, styles.previewBarShort, { backgroundColor: '#E5E7EB' }]} />
                 <View style={[styles.previewBar, styles.previewBarMedium, { backgroundColor: '#E5E7EB' }]} />
               </View>
-              <Text style={[styles.appearanceLabel, { color: selectedAppearance === 'light' ? Colors.primary : colors.text }]}>Light</Text>
+              <Text style={[styles.appearanceLabel, { color: appearance === 'light' ? Colors.primary : colors.text }]}>Light</Text>
             </TouchableOpacity>
 
             {/* Dark */}
             <TouchableOpacity
               style={[
                 styles.appearanceCard,
-                { backgroundColor: colors.surface, borderColor: selectedAppearance === 'dark' ? Colors.primary : colors.border },
+                { backgroundColor: colors.surface, borderColor: appearance === 'dark' ? Colors.primary : colors.border },
               ]}
-              onPress={() => setSelectedAppearance('dark')}
+              onPress={() => setAppearance('dark')}
               activeOpacity={0.7}
             >
               <View style={[styles.darkPreview, { backgroundColor: '#1F2937' }]}>
@@ -90,22 +85,22 @@ export default function ThemesScreen() {
                 <View style={[styles.previewBar, styles.previewBarShort, { backgroundColor: '#374151' }]} />
                 <View style={[styles.previewBar, styles.previewBarMedium, { backgroundColor: '#374151' }]} />
               </View>
-              <Text style={[styles.appearanceLabel, { color: selectedAppearance === 'dark' ? Colors.primary : colors.text }]}>Dark</Text>
+              <Text style={[styles.appearanceLabel, { color: appearance === 'dark' ? Colors.primary : colors.text }]}>Dark</Text>
             </TouchableOpacity>
 
             {/* System */}
             <TouchableOpacity
               style={[
                 styles.appearanceCard,
-                { backgroundColor: colors.surface, borderColor: selectedAppearance === 'system' ? Colors.primary : colors.border },
+                { backgroundColor: colors.surface, borderColor: appearance === 'system' ? Colors.primary : colors.border },
               ]}
-              onPress={() => setSelectedAppearance('system')}
+              onPress={() => setAppearance('system')}
               activeOpacity={0.7}
             >
               <View style={styles.systemPreview}>
                 <Text style={[styles.systemText, { color: colors.textSub }]}>A</Text>
               </View>
-              <Text style={[styles.appearanceLabel, { color: selectedAppearance === 'system' ? Colors.primary : colors.text }]}>System</Text>
+              <Text style={[styles.appearanceLabel, { color: appearance === 'system' ? Colors.primary : colors.text }]}>System</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -130,11 +125,11 @@ export default function ThemesScreen() {
                       styles.customAccentCard,
                       { borderColor: colors.textSub }
                     ] : { 
-                      backgroundColor: selectedAccent === accent.id ? `${accent.color}15` : colors.surface, 
-                      borderColor: selectedAccent === accent.id ? accent.color : colors.border 
+                      backgroundColor: accentColor === accent.id ? `${accent.color}15` : colors.surface, 
+                      borderColor: accentColor === accent.id ? accent.color : colors.border 
                     },
                   ]}
-                  onPress={() => setSelectedAccent(accent.id)}
+                  onPress={() => setAccentColor(accent.id)}
                   activeOpacity={0.7}
                 >
                   {accent.isCustom ? (
@@ -154,7 +149,7 @@ export default function ThemesScreen() {
                     </View>
                   )}
                   <View style={styles.accentInfo}>
-                    <Text style={[styles.accentName, { color: selectedAccent === accent.id ? accent.color : colors.text }]}>{accent.name}</Text>
+                    <Text style={[styles.accentName, { color: accentColor === accent.id ? accent.color : colors.text }]}>{accent.name}</Text>
                     <Text style={[styles.accentDescription, { color: colors.textSub }]}>{accent.description}</Text>
                   </View>
                 </TouchableOpacity>
