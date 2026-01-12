@@ -6,24 +6,23 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-const LEGAL_ITEMS = [
-  { icon: 'policy', label: 'Privacy Policy', color: Colors.primary },
-  { icon: 'description', label: 'Terms of Service', color: Colors.secondary },
-  { icon: 'code', label: 'Open Source Licenses', color: '#10B981' },
-];
+import { useTheme } from '@/constants/ThemeContext';
 
 export default function AboutScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
+
+  const LEGAL_ITEMS = [
+    { icon: 'policy', label: 'Privacy Policy', color: accent.primary },
+    { icon: 'description', label: 'Terms of Service', color: Colors.secondary },
+    { icon: 'code', label: 'Open Source Licenses', color: '#10B981' },
+  ];
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -45,8 +44,12 @@ export default function AboutScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* App Icon & Info */}
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.appInfo}>
-          <View style={styles.appIcon}>
-            <MaterialIcons name="local-florist" size={48} color="#FFFFFF" />
+          <View style={styles.appIconContainer}>
+            <Image 
+              source={require('@/assets/images/logo.png')} 
+              style={styles.appLogo}
+              resizeMode="contain"
+            />
           </View>
           <Text style={[styles.appName, { color: colors.text }]}>Vye App</Text>
           <Text style={[styles.appVersion, { color: colors.textSub }]}>Version 1.0.0 (Build 1042)</Text>
@@ -115,19 +118,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: Spacing.xl,
   },
-  appIcon: {
+  appIconContainer: {
     width: 100,
     height: 100,
     borderRadius: 24,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    shadowColor: Colors.primary,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
+    overflow: 'hidden',
+  },
+  appLogo: {
+    width: 80,
+    height: 80,
   },
   appName: {
     fontSize: typography.size.h2,

@@ -12,7 +12,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/constants/ThemeContext';
 
 const LANGUAGES = [
   { code: 'EN', name: 'English', color: '#3B82F6' },
@@ -25,9 +25,7 @@ const LANGUAGES = [
 ];
 
 export default function LanguageScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
 
   const [selectedLanguage, setSelectedLanguage] = useState('EN');
 
@@ -74,7 +72,7 @@ export default function LanguageScreen() {
                 <View 
                   style={[
                     styles.radio,
-                    { borderColor: selectedLanguage === language.code ? Colors.primary : colors.border },
+                    { borderColor: selectedLanguage === language.code ? accent.primary : colors.border },
                   ]}
                 >
                   {selectedLanguage === language.code && (

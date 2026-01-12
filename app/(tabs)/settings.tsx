@@ -12,8 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { BorderRadius, Spacing, typography } from '@/constants/theme';
+import { useTheme } from '@/constants/ThemeContext';
 
 const MENU_ITEMS = [
   { icon: 'notifications', label: 'Notifications' },
@@ -28,9 +28,7 @@ const MENU_ITEMS = [
 const GOALS = ['Track cycle', 'Track pregnancy', 'Get pregnant'];
 
 export default function SettingsScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -82,7 +80,7 @@ export default function SettingsScreen() {
                 style={[
                   styles.goalPill,
                   index === 0
-                    ? { backgroundColor: Colors.primary }
+                    ? { backgroundColor: accent.primary }
                     : { backgroundColor: colors.surface },
                 ]}
                 activeOpacity={0.7}
@@ -127,7 +125,7 @@ export default function SettingsScreen() {
                 activeOpacity={0.6}
               >
                 <View style={styles.menuItemLeft}>
-                  <MaterialIcons name={item.icon as any} size={24} color={colors.text} />
+                  <MaterialIcons name={item.icon as any} size={24} color={accent.primary} />
                   <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />

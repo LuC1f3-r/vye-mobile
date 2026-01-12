@@ -13,7 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/constants/ThemeContext';
 
 type SettingRowProps = {
   title: string;
@@ -24,8 +24,7 @@ type SettingRowProps = {
 };
 
 function SettingRow({ title, description, enabled, onToggle, delay = 0 }: SettingRowProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const { colors, accent } = useTheme();
 
   return (
     <Animated.View 
@@ -39,7 +38,7 @@ function SettingRow({ title, description, enabled, onToggle, delay = 0 }: Settin
       <Switch
         value={enabled}
         onValueChange={onToggle}
-        trackColor={{ false: colors.border, true: Colors.primary }}
+        trackColor={{ false: colors.border, true: accent.primary }}
         thumbColor="#FFFFFF"
       />
     </Animated.View>
@@ -47,9 +46,7 @@ function SettingRow({ title, description, enabled, onToggle, delay = 0 }: Settin
 }
 
 export default function NotificationSettingsScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark } = useTheme();
 
   const [dailyReminder, setDailyReminder] = useState(true);
   const [periodPrediction, setPeriodPrediction] = useState(true);

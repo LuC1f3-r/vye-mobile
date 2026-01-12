@@ -13,7 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/constants/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -269,9 +269,7 @@ function TimelineView({ isDark }: { isDark: boolean }) {
 }
 
 export default function RecordsScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
   const [activeTab, setActiveTab] = useState<'cycles' | 'timeline'>('cycles');
 
   return (
@@ -298,7 +296,7 @@ export default function RecordsScreen() {
           <Text
             style={[
               styles.tabText,
-              { color: activeTab === 'cycles' ? Colors.primary : colors.textSub },
+              { color: activeTab === 'cycles' ? accent.primary : colors.textSub },
             ]}
           >
             Cycles
@@ -312,7 +310,7 @@ export default function RecordsScreen() {
           <Text
             style={[
               styles.tabText,
-              { color: activeTab === 'timeline' ? Colors.primary : colors.textSub },
+              { color: activeTab === 'timeline' ? accent.primary : colors.textSub },
             ]}
           >
             Timeline

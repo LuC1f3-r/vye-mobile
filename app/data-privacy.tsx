@@ -13,12 +13,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/constants/ThemeContext';
 
 export default function DataPrivacyScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
 
   const [anonymousAnalytics, setAnonymousAnalytics] = useState(true);
   const [scientificResearch, setScientificResearch] = useState(false);
@@ -69,7 +67,7 @@ export default function DataPrivacyScreen() {
             <Switch
               value={anonymousAnalytics}
               onValueChange={setAnonymousAnalytics}
-              trackColor={{ false: colors.border, true: Colors.primary }}
+              trackColor={{ false: colors.border, true: accent.primary }}
               thumbColor="#FFFFFF"
             />
           </View>
@@ -84,7 +82,7 @@ export default function DataPrivacyScreen() {
             <Switch
               value={scientificResearch}
               onValueChange={setScientificResearch}
-              trackColor={{ false: colors.border, true: Colors.primary }}
+              trackColor={{ false: colors.border, true: accent.primary }}
               thumbColor="#FFFFFF"
             />
           </View>
@@ -106,8 +104,8 @@ export default function DataPrivacyScreen() {
             style={[styles.actionRow, { borderBottomColor: colors.border }]}
             activeOpacity={0.7}
           >
-            <Text style={[styles.deleteText, { color: Colors.primary }]}>Delete Account & Data</Text>
-            <MaterialIcons name="delete-outline" size={24} color={Colors.primary} />
+            <Text style={[styles.deleteText, { color: accent.primary }]}>Delete Account & Data</Text>
+            <MaterialIcons name="delete-outline" size={24} color={accent.primary} />
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>

@@ -13,7 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/constants/ThemeContext';
 
 type ReminderCardProps = {
   title: string;
@@ -40,8 +40,7 @@ function ReminderCard({
   note,
   delay = 0,
 }: ReminderCardProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const { colors, accent } = useTheme();
 
   return (
     <Animated.View 
@@ -57,7 +56,7 @@ function ReminderCard({
         <Switch
           value={enabled}
           onValueChange={onToggle}
-          trackColor={{ false: colors.border, true: Colors.primary }}
+          trackColor={{ false: colors.border, true: accent.primary }}
           thumbColor="#FFFFFF"
         />
       </View>
@@ -121,9 +120,7 @@ function ReminderCard({
 }
 
 export default function NotificationsScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark } = useTheme();
 
   const [periodEnabled, setPeriodEnabled] = useState(true);
   const [fertileEnabled, setFertileEnabled] = useState(false);

@@ -26,7 +26,7 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/constants/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -115,9 +115,7 @@ function Chip({ label, emoji, selected, onPress, colors }: ChipProps) {
 }
 
 export default function AddStateScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
 
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>(['headache']);

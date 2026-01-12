@@ -3,26 +3,24 @@ import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Colors, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Spacing, typography } from '@/constants/theme';
+import { useTheme } from '@/constants/ThemeContext';
 
 export default function StoreScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <Animated.View entering={FadeInUp.springify()} style={styles.content}>
         <View style={[styles.iconContainer, { backgroundColor: colors.surface }]}>
-          <MaterialIcons name="shopping-bag" size={48} color={Colors.primary} />
+          <MaterialIcons name="shopping-bag" size={48} color={accent.primary} />
         </View>
-        <Text style={[styles.title, { color: colors.text }]}>L-Store</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Store</Text>
         <Text style={[styles.subtitle, { color: colors.textSub }]}>
           Shop for wellness products curated for you
         </Text>
-        <Text style={[styles.comingSoon, { color: Colors.primary }]}>Coming Soon! 🛍️</Text>
+        <Text style={[styles.comingSoon, { color: accent.primary }]}>Coming Soon! 🛍️</Text>
       </Animated.View>
     </SafeAreaView>
   );

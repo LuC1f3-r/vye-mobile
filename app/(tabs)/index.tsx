@@ -447,6 +447,7 @@ const styles = StyleSheet.create({
   },
   dayNamesRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
   calendarGrid: {
@@ -454,6 +455,7 @@ const styles = StyleSheet.create({
   },
   calendarRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
   dayCell: {
@@ -489,8 +491,11 @@ const styles = StyleSheet.create({
   calendarFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: 8,
+    alignItems: 'flex-start',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
   },
   daysUntil: {},
   daysRow: {

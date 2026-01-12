@@ -13,18 +13,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-const TOP_QUESTIONS = [
-  { icon: '📅', label: 'How do I log my period?', color: Colors.primary },
-  { icon: '🔄', label: 'Syncing across devices', color: Colors.secondary },
-  { icon: '🔒', label: 'Privacy & Data backup', color: '#F59E0B' },
-];
+import { useTheme } from '@/constants/ThemeContext';
 
 export default function HelpFeedbackScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark, accent } = useTheme();
+
+  const TOP_QUESTIONS = [
+    { icon: '📅', label: 'How do I log my period?', color: accent.primary },
+    { icon: '🔄', label: 'Syncing across devices', color: Colors.secondary },
+    { icon: '🔒', label: 'Privacy & Data backup', color: '#F59E0B' },
+  ];
 
   const [topic, setTopic] = useState('General Inquiry');
   const [message, setMessage] = useState('');
@@ -49,7 +47,7 @@ export default function HelpFeedbackScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Greeting */}
         <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <Text style={[styles.greeting, { color: Colors.primary }]}>Hello, Rahaf!</Text>
+          <Text style={[styles.greeting, { color: accent.primary }]}>Hello, Rahaf!</Text>
           <Text style={[styles.greetingSub, { color: colors.textSub }]}>
             We're here to support you on your journey. How can we help today?
           </Text>
@@ -60,7 +58,7 @@ export default function HelpFeedbackScreen() {
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Top Questions</Text>
             <TouchableOpacity activeOpacity={0.7}>
-              <Text style={[styles.viewAll, { color: Colors.primary }]}>View All</Text>
+              <Text style={[styles.viewAll, { color: accent.primary }]}>View All</Text>
             </TouchableOpacity>
           </View>
 

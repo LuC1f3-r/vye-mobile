@@ -44,9 +44,9 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          height: 75,
-          paddingBottom: 10,
-          paddingTop: 10,
+          height: 90,
+          paddingBottom: 15,
+          paddingTop: 12,
         },
         tabBarShowLabel: false,
         tabBarItemStyle: {
@@ -74,9 +74,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="store"
         options={{
-          title: 'L-Store',
+          title: 'Store',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="shopping-bag" color={color} focused={focused} label="L-Store" />
+            <TabIcon name="shopping-bag" color={color} focused={focused} label="Store" />
           ),
         }}
       />
