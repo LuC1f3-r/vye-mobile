@@ -1,32 +1,29 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  StatusBar,
-  Dimensions,
-  Pressable,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { useTheme } from '@/constants/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import Animated, { 
-  FadeInDown, 
-  FadeInUp,
-  FadeInLeft,
-  FadeInRight,
-  FadeOutLeft,
-  FadeOutRight,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  Layout,
+import React, { useState } from 'react';
+import {
+    Dimensions,
+    Image,
+    Pressable,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import Animated, {
+    FadeInDown,
+    FadeInLeft,
+    FadeInRight,
+    FadeInUp,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring
 } from 'react-native-reanimated';
-import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useTheme } from '@/constants/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_HORIZONTAL_MARGIN = Spacing.md;
@@ -175,8 +172,8 @@ export default function DashboardScreen() {
                   style={[
                     styles.bandBackground,
                     { backgroundColor: inPeriod ? 'rgba(219, 108, 135, 0.15)' : accent.primaryLight },
-                    !prevInFertile && !prevInPeriod && { borderTopLeftRadius: DAY_CELL_SIZE / 2, borderBottomLeftRadius: DAY_CELL_SIZE / 2, left: '10%' },
-                    !nextInFertile && !nextInPeriod && { borderTopRightRadius: DAY_CELL_SIZE / 2, borderBottomRightRadius: DAY_CELL_SIZE / 2, right: '10%' },
+                    !prevInFertile && !prevInPeriod && { borderTopLeftRadius: DAY_CELL_SIZE / 2, borderBottomLeftRadius: DAY_CELL_SIZE / 2 },
+                    !nextInFertile && !nextInPeriod && { borderTopRightRadius: DAY_CELL_SIZE / 2, borderBottomRightRadius: DAY_CELL_SIZE / 2 },
                   ]} 
                 />
               )}
@@ -456,7 +453,7 @@ const styles = StyleSheet.create({
   calendarRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   dayCell: {
     width: DAY_CELL_SIZE,
@@ -467,10 +464,10 @@ const styles = StyleSheet.create({
   },
   bandBackground: {
     position: 'absolute',
-    top: 3,
-    bottom: 3,
-    left: 0,
-    right: 0,
+    top: 2,
+    bottom: 2,
+    left: -1,
+    right: -1,
   },
   dayCircle: {
     width: DAY_CELL_SIZE - 12,
@@ -491,40 +488,44 @@ const styles = StyleSheet.create({
   calendarFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginTop: 16,
-    paddingTop: 16,
+    alignItems: 'center',
+    marginTop: 20,
+    paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: 'rgba(0,0,0,0.06)',
   },
-  daysUntil: {},
+  daysUntil: {
+    flex: 1,
+  },
   daysRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
   },
   daysNumber: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: 'bold',
   },
   daysLabel: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '600',
+    marginLeft: 4,
   },
   daysSubtitle: {
     fontSize: 12,
-    marginTop: 2,
+    marginTop: 4,
   },
   legend: {
     gap: 8,
   },
   legendRow: {
     flexDirection: 'row',
-    gap: 16,
+    justifyContent: 'flex-end',
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    minWidth: 75,
   },
   legendBox: {
     width: 14,
