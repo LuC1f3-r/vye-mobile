@@ -1,19 +1,19 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { BorderRadius, Spacing, typography } from '@/constants/theme';
 import { useTheme } from '@/constants/ThemeContext';
+import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import React from 'react';
+import {
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MENU_ITEMS = [
   { icon: 'notifications', label: 'Notifications' },
@@ -42,7 +42,11 @@ export default function SettingsScreen() {
 
         {/* Profile Section */}
         <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <TouchableOpacity style={styles.profileSection} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={styles.profileSection} 
+            activeOpacity={0.7}
+            onPress={() => router.push('/personal-information')}
+          >
             <View style={styles.profileInfo}>
               <Image
                 source={{ uri: 'https://i.pravatar.cc/100?img=5' }}
@@ -50,7 +54,7 @@ export default function SettingsScreen() {
               />
               <View style={styles.profileText}>
                 <Text style={[styles.profileName, { color: colors.text }]} numberOfLines={1}>
-                  Rahaf Saad 
+                  Sreelakshmi S Raj
                 </Text>
                 <Text style={[styles.profileSubtext, { color: colors.textSub }]} numberOfLines={1}>
                   view personal information
