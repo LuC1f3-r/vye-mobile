@@ -1,32 +1,29 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  StatusBar,
-  Dimensions,
-  Pressable,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { BorderRadius, Colors, Spacing, typography } from '@/constants/theme';
+import { useTheme } from '@/constants/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import Animated, { 
-  FadeInDown, 
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-  interpolate,
-  Extrapolation,
+import React, { useState } from 'react';
+import {
+    Dimensions,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import Animated, {
+    FadeInDown,
+    FadeInUp,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
 } from 'react-native-reanimated';
-import { Colors, BorderRadius, Spacing, typography } from '@/constants/theme';
-import { useTheme } from '@/constants/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -138,29 +135,8 @@ export default function AddStateScreen() {
     router.back();
   };
 
-  // Scroll-triggered save button animation
-  const saveButtonTranslateY = useSharedValue(100);
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-    const isNearBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 50;
-    
-    if (isNearBottom) {
-      // Show button - pop up from bottom
-      saveButtonTranslateY.value = withSpring(0, { damping: 15, stiffness: 150 });
-    } else {
-      // Hide button - slide down and fade out
-      saveButtonTranslateY.value = withSpring(100, { damping: 20, stiffness: 120 });
-    }
-  };
-
-  const saveButtonAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: saveButtonTranslateY.value }],
-    opacity: interpolate(saveButtonTranslateY.value, [100, 0], [0, 1], Extrapolation.CLAMP),
-  }));
-
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Header */}
@@ -172,12 +148,16 @@ export default function AddStateScreen() {
         <View style={styles.headerPlaceholder} />
       </Animated.View>
 
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
-        contentContainerStyle={styles.scrollContent}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        <ScrollView 
+          showsVerticalScrollIndicator={false} 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
         {/* Mini Date Picker */}
         <Animated.View 
           entering={FadeInDown.delay(100).springify()}
@@ -296,21 +276,23 @@ export default function AddStateScreen() {
             textAlignVertical="top"
           />
         </Animated.View>
-      </ScrollView>
+        </ScrollView>
 
-      {/* Floating Save Button - appears when scrolled to bottom */}
-      <Animated.View 
-        style={[styles.saveContainer, saveButtonAnimatedStyle]}
-      >
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={handleSave}
-          activeOpacity={0.8}
+        {/* Fixed Save Button at Bottom - always visible */}
+        <Animated.View 
+          entering={FadeInDown.delay(600).springify()}
+          style={[styles.saveContainer, { backgroundColor: colors.background }]}
         >
-          <MaterialIcons name="check" size={28} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={[styles.saveLabel, { color: colors.textSub }]}>Save</Text>
-      </Animated.View>
+          <TouchableOpacity
+            style={[styles.saveButton, { backgroundColor: accent.primary }]}
+            onPress={handleSave}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="check" size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={[styles.saveLabel, { color: colors.textSub }]}>Save</Text>
+        </Animated.View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -338,8 +320,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,
-    paddingBottom: 120,
-    overflow: 'hidden',
+    paddingBottom: Spacing.md,
+  },
+  keyboardView: {
+    flex: 1,
   },
   datePicker: {
     borderRadius: BorderRadius.lg,
@@ -429,16 +413,14 @@ const styles = StyleSheet.create({
     minHeight: 80,
   },
   saveContainer: {
-    position: 'absolute',
-    bottom: 30,
-    alignSelf: 'center',
     alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingBottom: Spacing.lg,
   },
   saveButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.primary,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: Colors.primary,
@@ -449,7 +431,7 @@ const styles = StyleSheet.create({
   },
   saveLabel: {
     fontSize: typography.size.small,
-    marginTop: 4,
+    marginTop: 6,
     fontWeight: '500',
   },
 });

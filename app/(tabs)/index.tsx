@@ -2,7 +2,7 @@ import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/constants/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Dimensions,
     Image,
@@ -15,13 +15,18 @@ import {
     View,
 } from 'react-native';
 import Animated, {
+    Easing,
     FadeInDown,
     FadeInLeft,
     FadeInRight,
     FadeInUp,
+    cancelAnimation,
     useAnimatedStyle,
     useSharedValue,
-    withSpring
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -104,24 +109,49 @@ function AnimatedCard({ children, onPress, style, delay = 0 }: AnimatedCardProps
 
 export default function DashboardScreen() {
   const { colors, isDark, accent } = useTheme();
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 1)); // January 2024
+  const [currentDate, setCurrentDate] = useState(new Date()); // Start with current month
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+  
+  // Current date blinking animation - using border opacity
+  const blinkOpacity = useSharedValue(1);
+  
+  useEffect(() => {
+    // Subtle slow pulsing animation for current date border
+    blinkOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.3, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1, // infinite
+      false
+    );
+    
+    return () => {
+      cancelAnimation(blinkOpacity);
+    };
+  }, []);
+  
+  const todayBorderStyle = useAnimatedStyle(() => ({
+    borderWidth: 2,
+    borderColor: `rgba(219, 108, 135, ${blinkOpacity.value})`,
+  }));
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
                       'July', 'August', 'September', 'October', 'November', 'December'];
   
   const currentMonth = `${monthNames[currentDate.getMonth()]}, ${currentDate.getFullYear()}`;
 
+  // Use functional state updates to avoid stale closures
   const goToPreviousMonth = () => {
     setSlideDirection('left');
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
   const goToNextMonth = () => {
     setSlideDirection('right');
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   // Get today's date info
   const today = new Date();
   const isCurrentMonth = today.getMonth() === currentDate.getMonth() && today.getFullYear() === currentDate.getFullYear();
@@ -155,6 +185,7 @@ export default function DashboardScreen() {
           const dayStyle = getDayStyle(day);
           const inFertile = isInFertileBand(day);
           const inPeriod = isInPeriodBand(day);
+          const isToday = dayStyle.type === 'today';
           
           // Check if previous/next day is in same band for continuous background
           const prevDay = colIndex > 0 ? row[colIndex - 1] : null;
@@ -163,28 +194,32 @@ export default function DashboardScreen() {
           const nextInFertile = isInFertileBand(nextDay);
           const prevInPeriod = isInPeriodBand(prevDay);
           const nextInPeriod = isInPeriodBand(nextDay);
+          
+          // Determine if this is first or last in band (for rounded corners)
+          const isFirstInBand = (inFertile && !prevInFertile) || (inPeriod && !prevInPeriod);
+          const isLastInBand = (inFertile && !nextInFertile) || (inPeriod && !nextInPeriod);
 
-          return (
+          const dayCellContent = (
             <View key={colIndex} style={styles.dayCell}>
               {/* Fertile/Period background band */}
               {(inFertile || inPeriod) && (
                 <View 
                   style={[
                     styles.bandBackground,
-                    { backgroundColor: inPeriod ? 'rgba(219, 108, 135, 0.15)' : accent.primaryLight },
-                    !prevInFertile && !prevInPeriod && { borderTopLeftRadius: DAY_CELL_SIZE / 2, borderBottomLeftRadius: DAY_CELL_SIZE / 2 },
-                    !nextInFertile && !nextInPeriod && { borderTopRightRadius: DAY_CELL_SIZE / 2, borderBottomRightRadius: DAY_CELL_SIZE / 2 },
+                    { backgroundColor: inPeriod ? 'rgba(219, 108, 135, 0.2)' : accent.primaryLight },
+                    isFirstInBand && styles.bandFirst,
+                    isLastInBand && styles.bandLast,
                   ]} 
                 />
               )}
               
-              {/* Day circle */}
-              <View
+              {/* Day circle - with animated border for today */}
+              <Animated.View
                 style={[
                   styles.dayCircle,
                   dayStyle.type === 'period' && { backgroundColor: accent.primary },
                   dayStyle.type === 'ovulation' && { backgroundColor: Colors.secondary },
-                  dayStyle.type === 'today' && { borderWidth: 2, borderColor: colors.text },
+                  isToday && todayBorderStyle,
                 ]}
               >
                 <Text
@@ -194,14 +229,16 @@ export default function DashboardScreen() {
                     dayStyle.type === 'period' && { color: '#FFFFFF', fontWeight: '600' },
                     dayStyle.type === 'ovulation' && { color: '#FFFFFF', fontWeight: '600' },
                     dayStyle.type === 'fertile' && { color: accent.primary },
-                    dayStyle.type === 'today' && { fontWeight: '700' },
+                    isToday && { fontWeight: '700', color: accent.primary },
                   ]}
                 >
                   {day}
                 </Text>
-              </View>
+              </Animated.View>
             </View>
           );
+          
+          return dayCellContent;
         })}
       </View>
     );
@@ -229,7 +266,7 @@ export default function DashboardScreen() {
               style={[styles.profileName, { color: colors.text }]} 
               numberOfLines={1}
             >
-              Rahaf Saad 
+              Angela 
             </Text>
             <MaterialIcons name="keyboard-arrow-down" size={22} color={colors.text} />
           </TouchableOpacity>
@@ -464,10 +501,20 @@ const styles = StyleSheet.create({
   },
   bandBackground: {
     position: 'absolute',
-    top: 2,
-    bottom: 2,
-    left: -1,
-    right: -1,
+    top: 6,
+    bottom: 6,
+    left: 0,
+    right: 0,
+  },
+  bandFirst: {
+    left: 6,
+    borderTopLeftRadius: DAY_CELL_SIZE / 2,
+    borderBottomLeftRadius: DAY_CELL_SIZE / 2,
+  },
+  bandLast: {
+    right: 6,
+    borderTopRightRadius: DAY_CELL_SIZE / 2,
+    borderBottomRightRadius: DAY_CELL_SIZE / 2,
   },
   dayCircle: {
     width: DAY_CELL_SIZE - 12,
