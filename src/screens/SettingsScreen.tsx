@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MENU_ITEMS = [
@@ -35,42 +34,47 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.content}>
         {/* Header */}
-        <Animated.View entering={FadeInUp.springify()} style={styles.header}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
           <MaterialIcons name="settings" size={28} color={colors.text} />
           <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
-        </Animated.View>
+        </View>
 
         {/* Profile Section */}
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <TouchableOpacity
-            style={styles.profileSection}
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('PersonalInformation')}
-          >
-            <View style={styles.profileInfo}>
-              <Image
-                source={{ uri: 'https://i.pravatar.cc/100?img=5' }}
-                style={styles.profileImage}
-              />
-              <View style={styles.profileText}>
-                <Text style={[styles.profileName, { color: colors.text }]} numberOfLines={1}>
-                  Sreelakshmi S Raj
-                </Text>
-                <Text style={[styles.profileSubtext, { color: colors.textSub }]} numberOfLines={1}>
-                  view personal information
-                </Text>
-              </View>
+        <TouchableOpacity
+          style={styles.profileSection}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('PersonalInformation')}
+        >
+          <View style={styles.profileInfo}>
+            <Image
+              source={{ uri: 'https://i.pravatar.cc/100?img=5' }}
+              style={styles.profileImage}
+            />
+            <View style={styles.profileText}>
+              <Text style={[styles.profileName, { color: colors.text }]} numberOfLines={1}>
+                Sreelakshmi S Raj
+              </Text>
+              <Text style={[styles.profileSubtext, { color: colors.textSub }]} numberOfLines={1}>
+                view personal information
+              </Text>
             </View>
-            <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />
-          </TouchableOpacity>
-        </Animated.View>
+          </View>
+          <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />
+        </TouchableOpacity>
 
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
         {/* Goals Section */}
-        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.goalsSection}>
+        <View style={styles.goalsSection}>
           <View style={styles.goalsHeader}>
             <MaterialIcons name="calendar-today" size={20} color={colors.text} />
             <Text style={[styles.goalsLabel, { color: colors.text }]}>My Goal:</Text>
@@ -102,44 +106,40 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
-        </Animated.View>
+        </View>
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
-          {MENU_ITEMS.map((item, index) => (
-            <Animated.View
+          {MENU_ITEMS.map((item) => (
+            <TouchableOpacity
               key={item.label}
-              entering={FadeInDown.delay(300 + index * 50).springify()}
+              style={[styles.menuItem, { borderBottomColor: colors.border }]}
+              onPress={() => {
+                if (item.label === 'Notifications') {
+                  navigation.navigate('NotificationSettings');
+                } else if (item.label === 'Language') {
+                  navigation.navigate('Language');
+                } else if (item.label === 'Themes') {
+                  navigation.navigate('Themes');
+                } else if (item.label === 'Help and Feedback') {
+                  navigation.navigate('HelpFeedback');
+                } else if (item.label === 'Data Privacy') {
+                  navigation.navigate('DataPrivacy');
+                } else if (item.label === 'About Vye') {
+                  navigation.navigate('About');
+                }
+              }}
+              activeOpacity={0.6}
             >
-              <TouchableOpacity
-                style={[styles.menuItem, { borderBottomColor: colors.border }]}
-                onPress={() => {
-                  if (item.label === 'Notifications') {
-                    navigation.navigate('NotificationSettings');
-                  } else if (item.label === 'Language') {
-                    navigation.navigate('Language');
-                  } else if (item.label === 'Themes') {
-                    navigation.navigate('Themes');
-                  } else if (item.label === 'Help and Feedback') {
-                    navigation.navigate('HelpFeedback');
-                  } else if (item.label === 'Data Privacy') {
-                    navigation.navigate('DataPrivacy');
-                  } else if (item.label === 'About Vye') {
-                    navigation.navigate('About');
-                  }
-                }}
-                activeOpacity={0.6}
-              >
-                <View style={styles.menuItemLeft}>
-                  <MaterialIcons name={item.icon as any} size={24} color={accent.primary} />
-                  <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
-                </View>
-                <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />
-              </TouchableOpacity>
-            </Animated.View>
+              <View style={styles.menuItemLeft}>
+                <MaterialIcons name={item.icon as any} size={24} color={accent.primary} />
+                <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color={colors.textSub} />
+            </TouchableOpacity>
           ))}
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -148,9 +148,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 100,
-    overflow: 'hidden',
+  content: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -158,6 +157,9 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
+  },
+  backButton: {
+    padding: 4,
   },
   headerTitle: {
     fontSize: typography.size.h2,
@@ -246,3 +248,4 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
