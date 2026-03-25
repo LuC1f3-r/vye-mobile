@@ -157,7 +157,7 @@ export default function OnboardingBirthdayScreen() {
 
         {/* Illustration */}
         <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.illustrationContainer}>
-          <View style={[styles.illustrationWrapper, { backgroundColor: isDark ? colors.surface : '#FBF5F3' }]}>
+          <View style={styles.illustrationWrapper}>
             <Image
               source={require('../../assets/images/logo.png')}
               style={styles.illustration}
