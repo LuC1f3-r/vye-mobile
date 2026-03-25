@@ -41,7 +41,7 @@ export default function OnboardingScreen() {
 
         {/* Logo & Illustration */}
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.illustrationContainer}>
-          <View style={[styles.logoWrapper, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+          <View style={styles.logoWrapper}>
             <Image
               source={require('../../assets/images/logo.png')}
               style={styles.logo}
@@ -100,11 +100,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 6,
   },
   logo: {
     width: '70%',

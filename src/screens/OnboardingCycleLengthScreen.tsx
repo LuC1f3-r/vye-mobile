@@ -21,7 +21,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ITEM_HEIGHT = 56;
-const VISIBLE_ITEMS = 4;
+const VISIBLE_ITEMS = 5;
 
 const CYCLE_LENGTHS = Array.from({ length: 21 }, (_, i) => i + 20); // 20-40 days
 
@@ -75,7 +75,7 @@ export default function OnboardingCycleLengthScreen() {
 
       {/* Illustration */}
       <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.illustrationContainer}>
-        <View style={[styles.illustrationWrapper, { backgroundColor: isDark ? colors.surface : '#FBF5F3' }]}>
+        <View style={styles.illustrationWrapper}>
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.illustration}
@@ -94,9 +94,15 @@ export default function OnboardingCycleLengthScreen() {
         </Text>
       </Animated.View>
 
+      {/* Spacer */}
+      <View style={styles.spacer} />
+
       {/* Cycle Length Picker */}
       <Animated.View entering={FadeInDown.delay(300).springify()} style={styles.pickerContainer}>
-        <View style={[styles.selectionHighlight, { backgroundColor: Colors.primaryLight, borderColor: colors.border }]} />
+        {/* Selection highlight overlay */}
+        <View style={styles.highlightOverlay} pointerEvents="none">
+          <View style={[styles.selectionHighlight, { backgroundColor: Colors.primaryLight, borderColor: colors.border }]} />
+        </View>
         <ScrollView
           ref={scrollViewRef}
           showsVerticalScrollIndicator={false}
@@ -128,7 +134,7 @@ export default function OnboardingCycleLengthScreen() {
                   style={[
                     styles.cycleItemText,
                     {
-                      color: colors.text,
+                      color: isSelected ? '#000000' : colors.text,
                       opacity,
                       fontWeight: isSelected ? '600' : '400',
                     },
@@ -201,19 +207,22 @@ const styles = StyleSheet.create({
     fontSize: typography.size.caption,
     textAlign: 'center',
   },
-  pickerContainer: {
+  spacer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
+  },
+  pickerContainer: {
+    height: ITEM_HEIGHT * VISIBLE_ITEMS,
+    alignSelf: 'center',
+    width: '100%',
     marginHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+  },
+  highlightOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'stretch',
   },
   selectionHighlight: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: '50%',
-    marginTop: -(ITEM_HEIGHT / 2),
     height: ITEM_HEIGHT,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
